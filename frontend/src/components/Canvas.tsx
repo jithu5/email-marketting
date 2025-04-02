@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect } from "react";
 import {
     ReactFlow,
     Controls,
@@ -11,7 +11,7 @@ import {
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import CustomDialog from "./CustomDialog";
-import emailStore from "../store/emailStore"; // Adjust path based on actual location
+import nodeStore from "../store/emailStore"; // Adjust path based on actual location
 
 // Initial Edges
 const initialEdges = [
@@ -26,8 +26,7 @@ const initialEdges = [
 
 function Canvas() {
     // Zustand store access
-    const nodes = emailStore((state) => state.nodes); // Direct access prevents re-renders
-    const [prevNodes, setPrevNodes] = useState<Node[]>([]); // Store previous state
+    const nodes = nodeStore((state) => state.nodes); // Direct access prevents re-renders
 
     // React Flow state management
     const [flowNodes, setNodes, onNodesChange] = useNodesState<Node>(nodes);
@@ -35,11 +34,8 @@ function Canvas() {
 
     // Sync Zustand nodes with React Flow only if the nodes actually changed
     useEffect(() => {
-        if (JSON.stringify(prevNodes) !== JSON.stringify(nodes)) {
-            setNodes(nodes);
-            setPrevNodes(nodes);
-        }
-    }, [nodes]);
+       setNodes(nodes)
+    }, [nodes,setNodes]);
 
     // Handle new edge connections
     const onConnect = useCallback(

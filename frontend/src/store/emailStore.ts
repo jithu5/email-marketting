@@ -1,22 +1,23 @@
 import { create } from "zustand";
-import { type Node} from "@xyflow/react"
-
+import { type Node } from "@xyflow/react"
+import { emailTemplates } from "../constants/index";
 
 // Define Zustand store
-interface EmailStore {
+interface INodeStore {
     nodes: Node[];
     addNodes: (newNode: Node) => void;
+    updateNodes: (id: string, updatedNode: Node) => void;
     deleteNode: (id: string) => void;
 }
 
 // Zustand store creation
-const emailStore = create<EmailStore>((set) => ({
+const nodeStore = create<INodeStore>((set) => ({
     nodes: [
         {
             id: "1",
             position: { x: 138, y: 0 },
             type: "customNode",
-            data:{label:"Add items"}
+            data: { label: "Add items" }
         },
         {
             id: "2",
@@ -27,7 +28,7 @@ const emailStore = create<EmailStore>((set) => ({
             id: "3",
             position: { x: 138, y: 350 },
             type: "customNode",
-            data:{label:"Add items"}
+            data: { label: "Add items" }
         },
     ],
 
@@ -35,6 +36,13 @@ const emailStore = create<EmailStore>((set) => ({
         set((state) => ({
             nodes: [...state.nodes, newNode],
         })),
+    updateNodes: (id, updatedNode) =>
+        set((state) => ({
+            nodes: state.nodes.map((node) =>
+                node.id === id ? { ...node, ...updatedNode } : node
+            ),
+        })),
+
 
     deleteNode: (id) =>
         set((state) => ({
@@ -42,4 +50,23 @@ const emailStore = create<EmailStore>((set) => ({
         })),
 }));
 
-export default emailStore;
+export interface IemailTemplates {
+    subject: string,
+    name: string,
+    body: string
+}
+
+interface IEmailTemplatesStore {
+    emailTemplates: IemailTemplates[];
+    addEmailTemplates: (newTemplate: IemailTemplates) => void;
+}
+
+const emailTemplateStore = create<IEmailTemplatesStore>((set) => ({
+    emailTemplates: [...emailTemplates],
+    addEmailTemplates: (newTemplate) => set((state) => ({
+        emailTemplates: [...state.emailTemplates, newTemplate]
+    }))
+}))
+
+export { emailTemplateStore };
+export default nodeStore;
