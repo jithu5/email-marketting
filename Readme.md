@@ -56,8 +56,8 @@ JWT Authentication
 
 ### 1️⃣ Clone the Repository
 
-git clone https://github.com/your-username/mern-mail-marketing.git
-cd mern-mail-marketing
+git clone https://github.com/jithu5/email-marketting.git
+cd email-marketting
 
 ### 2️⃣ Install Dependencies
 
@@ -113,9 +113,8 @@ mern-mail-marketing/
 │   ├── models/
 │   ├── routes/
 │   ├── controllers/
-│   ├── services/
 │   ├── jobs/    # Agenda Jobs for scheduling
-│   ├── server.js
+│   ├── index.js
 │   └── .env
 │
 ├── frontend/
