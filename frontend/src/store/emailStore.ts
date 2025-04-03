@@ -1,13 +1,23 @@
 import { create } from "zustand";
-import { type Node } from "@xyflow/react"
+import { type Node, addEdge } from "@xyflow/react"
 import { emailTemplates } from "../constants/index";
 
 // Define Zustand store
 interface INodeStore {
     nodes: Node[];
+    edges: IEdge[];
     addNodes: (newNode: Node) => void;
     updateNodes: (id: string, updatedNode: Node) => void;
     deleteNode: (id: string) => void;
+    addEdge: ( edges: any) => void;
+}
+
+interface IEdge {
+    id: string;
+    source: string;
+    target: string;
+    type: string;
+    animated?: boolean;
 }
 
 // Zustand store creation
@@ -31,6 +41,13 @@ const nodeStore = create<INodeStore>((set) => ({
             data: { label: "Add items" }
         },
     ],
+    edges: [{
+        id: "e1-2",
+        source: "2",
+        target: "3",
+        type: "default",
+        animated: true,
+    },],
 
     addNodes: (newNode) =>
         set((state) => ({
@@ -47,6 +64,10 @@ const nodeStore = create<INodeStore>((set) => ({
     deleteNode: (id) =>
         set((state) => ({
             nodes: state.nodes.filter((node) => node.id !== id),
+        })),
+    addEdge: (newEdge) =>
+        set((state) => ({
+            edges: addEdge(newEdge, state.edges),
         })),
 }));
 

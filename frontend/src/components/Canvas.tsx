@@ -13,24 +13,13 @@ import "@xyflow/react/dist/style.css";
 import CustomDialog from "./CustomDialog";
 import nodeStore from "../store/emailStore"; // Adjust path based on actual location
 
-// Initial Edges
-const initialEdges = [
-    {
-        id: "e1-2",
-        source: "2",
-        target: "3",
-        type: "default",
-        animated: true,
-    },
-];
-
 function Canvas() {
     // Zustand store access
-    const nodes = nodeStore((state) => state.nodes); // Direct access prevents re-renders
+    const { nodes,edges : edgeFromStore } = nodeStore(); // Adjust path based on actual location
 
     // React Flow state management
     const [flowNodes, setNodes, onNodesChange] = useNodesState<Node>(nodes);
-    const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+    const [edges, setEdges, onEdgesChange] = useEdgesState(edgeFromStore);
 
     // Sync Zustand nodes with React Flow only if the nodes actually changed
     useEffect(() => {
@@ -56,7 +45,7 @@ function Canvas() {
                 onEdgesChange={onEdgesChange}
                 onConnect={onConnect}
                 nodeTypes={nodeTypes}
-                fitView
+                
             >
                 <MiniMap />
                 <Background />

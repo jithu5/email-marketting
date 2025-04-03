@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import {
     Dialog,
     DialogContent,
@@ -13,13 +13,13 @@ import { Clock1, Mail } from "lucide-react";
 import EmailDelayContent from "./EmailDelayContent";
 import nodeStore, { emailTemplateStore } from "../store/emailStore";
 
-function EmailOrDelay({ type, closeMainDialog }: { type: string, closeMainDialog: Function }) {
+function EmailOrDelay({ type, closeMainDialog }: { type: string, closeMainDialog: Function, setEdges:Function }) {
     const [subDialogOpen, setSubDialogOpen] = useState(false);
     const [selectedTemplate, setSelectedTemplate] = useState<string>("")
-    const { addNodes, nodes, updateNodes } = nodeStore()
+    const { addNodes, nodes, updateNodes ,addEdge} = nodeStore()
     const { emailTemplates } = emailTemplateStore()
 
-    const addNewNode = (emailTemplate: string) => {
+    const addNewNode = useCallback((emailTemplate: string) =>{
         if (!emailTemplate) return;
 
         const template = emailTemplates.find(email => email.name === emailTemplate);
@@ -37,7 +37,8 @@ function EmailOrDelay({ type, closeMainDialog }: { type: string, closeMainDialog
                 x:  lastNode.position.x,
                 y: lastNode.position.y + 150 
             },
-            data: { label: 'email', value: template }
+            data: { label: 'email', value: template },
+            // type: "customNode",
         };
 
         addNodes(newNode); // Add new node
@@ -46,7 +47,11 @@ function EmailOrDelay({ type, closeMainDialog }: { type: string, closeMainDialog
         if (lastNode) {
             updateNodes(lastNode.id, { position: { x: lastNode.position.x, y: lastNode.position.y+300 } });
         }
-    };
+        const newEdge = { id: `e${Number(newNodeId) - 1}-${newNodeId}`, source: Number(newNodeId) - 1, target: newNodeId }
+        addEdge(newEdge); // Automatically add edge
+
+        // setEdges((eds:any) => addEdge(newEdge, eds)); // Automatically add edge
+    },[nodes])
 
     console.log(nodes)
     return (
