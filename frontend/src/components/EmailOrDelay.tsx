@@ -12,14 +12,18 @@ import { Button } from "./ui/button";
 import { Clock1, Mail } from "lucide-react";
 import EmailDelayContent from "./EmailDelayContent";
 import nodeStore, { emailTemplateStore } from "../store/emailStore";
+import { useReactFlow } from "@xyflow/react";
+import { type Node } from "reactflow";
 
 function EmailOrDelay({ type, closeMainDialog }: { type: string, closeMainDialog: Function }) {
     const [subDialogOpen, setSubDialogOpen] = useState(false);
     const [selectedTemplate, setSelectedTemplate] = useState<string>("")
-    const { addNodes, nodes, updateNodes ,addEdge} = nodeStore()
+    const { addNodes, nodes, updateNodes, addEdge,edges } = nodeStore()
     const { emailTemplates } = emailTemplateStore()
+    const { setNodes, setEdges } = useReactFlow();
 
-    const addNewNode = useCallback((emailTemplate: string) =>{
+
+    const addNewNode = useCallback((emailTemplate: string) => {
         if (!emailTemplate) return;
 
         const template = emailTemplates.find(email => email.name === emailTemplate);
@@ -28,32 +32,46 @@ function EmailOrDelay({ type, closeMainDialog }: { type: string, closeMainDialog
             return;
         }
 
-        const lastNode = nodes[nodes.length - 1]; // Get the last node
-        const newNodeId = (nodes.length).toString(); // Ensure unique ID
-        const lastNodeId = (nodes.length - 1).toString(); // Get the last node ID
+        const lastNode = nodes[nodes.length - 1];
+        const newNodeId = (nodes.length).toString();
+        const lastNodeId = (nodes.length).toString();
 
         const newNode = {
             id: newNodeId,
             position: {
-                x:  lastNode.position.x,
-                y: lastNode.position.y + 150 
+                x: lastNode.position.x,
+                y: lastNode.position.y + 150
             },
-            data: { label: 'email', value: template },
-            // type: "customNode",
+            data: { label: 'Welcome template', value: template },
+            type: "emailNode",
         };
 
-        addNodes(newNode); // Add new node
+        updateNodes(lastNodeId, {
+            id: (Number(lastNodeId) + 1).toString(),
+            position: {
+                x: lastNode.position.x,
+                y: lastNode.position.y + 400
+            }
+        });
 
-        // Update the last node to ensure smooth linking
-        // if (lastNode) {
-            updateNodes(lastNodeId, {id:"w", position: { x: lastNode.position.x, y: lastNode.position.y+300 },data: { label:'m', }});
-        // }
-        const newEdge = { id: `e${Number(newNodeId) - 1}-${newNodeId}`, source: Number(newNodeId) - 1, target: newNodeId }
-        addEdge(newEdge); // Automatically add edge
+        addNodes(newNode);
+        setNodes((prev) => [...prev, newNode]); // for React Flow rendering
 
-        // setEdges((eds:any) => addEdge(newEdge, eds)); // Automatically add edge
-    },[nodes])
+        const newEdge = {
+            id: `e${newNodeId}-${Number(newNodeId) + 1}`,
+            source: newNodeId,
+            target: (Number(newNodeId) + 1).toString(),
+            animated: true,
+            type: 'default'
+        };
 
+        addEdge(newEdge); // for your store
+        setEdges((prev) => [...prev, newEdge]); // for React Flow rendering
+
+    }, [nodes, emailTemplates, addNodes, updateNodes, addEdge, setEdges]);
+
+    
+    console.log(edges);
     console.log(nodes)
     return (
         <Dialog open={subDialogOpen} onOpenChange={setSubDialogOpen}>

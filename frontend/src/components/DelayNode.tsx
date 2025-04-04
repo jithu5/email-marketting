@@ -20,7 +20,7 @@ function DelayNode({ data }: {data:{label: string, value:Date} }) {
                     </div>
                 </div>
                 <Handle
-                    type="target"
+                    type="source"
                     position={Position.Bottom}
                     className="bg-gray-500 w-3 h-3 rounded-full" />
             </div>
