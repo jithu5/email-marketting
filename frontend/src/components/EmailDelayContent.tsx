@@ -5,9 +5,16 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrig
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 
-function EmailDelayContent({ type, setSelectedTemplate }: { type: string, setSelectedTemplate: Function}) {
+function EmailDelayContent({ type, setSelectedTemplate, delayDateTime, handleDateChange }: { type: string, setSelectedTemplate: Function, delayDateTime: string, handleDateChange: React.ChangeEventHandler<HTMLInputElement>}) {
     const [isEmailNode, setIsEmailNode] = useState(false);
+    const [minDateTime, setMinDateTime] = useState("");
     const emailTemplates = emailTemplateStore((state) => state.emailTemplates)
+
+    useEffect(() => {
+        const now = new Date();
+        const formatted = now.toISOString().slice(0, 16); // "YYYY-MM-DDTHH:mm"
+        setMinDateTime(formatted);
+    }, []);
 
     const nodes = emailStore((state) => state.nodes);
 
@@ -68,26 +75,21 @@ function EmailDelayContent({ type, setSelectedTemplate }: { type: string, setSel
                         </>
                         :
                         <div className="flex flex-col gap-2 p-4 w-full">
-                            {/* <Label className="font-medium text-center">Delay Time</Label> */}
-
+                            <Label className="font-medium text-center">Delay Time</Label>
                             <div className="flex flex-col gap-4">
                                 <div className="flex flex-col w-full">
-                                    <Label htmlFor="days">Days</Label>
-                                    <Input id="days" type="number" placeholder="0" className="w-full" min="0" />
-                                </div>
-
-                                <div className="flex flex-col w-full">
-                                    <Label htmlFor="hours">Hours</Label>
-                                    <Input id="hours" type="number" placeholder="0" className="w-full" min="0" max="23" />
-                                </div>
-
-                                <div className="flex flex-col w-full">
-                                    <Label htmlFor="minutes">Minutes</Label>
-                                    <Input id="minutes" type="number" placeholder="0" className="w-full" min="0" max="59" />
+                                    <Label htmlFor="delay">Select Date & Time</Label>
+                                    <Input
+                                        id="delay"
+                                        type="datetime-local"
+                                        className="w-full"
+                                        min={minDateTime}
+                                        value={delayDateTime}
+                                        onChange={handleDateChange}
+                                    />
                                 </div>
                             </div>
                         </div>
-
                 }
             </div>
         </>
