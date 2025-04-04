@@ -1,5 +1,6 @@
 import { create } from "zustand";
-import { type Node, addEdge } from "@xyflow/react"
+import { addEdge } from "@xyflow/react";
+import { type Node } from "reactflow";
 import { emailTemplates } from "../constants/index";
 
 // Define Zustand store
@@ -9,7 +10,7 @@ interface INodeStore {
     addNodes: (newNode: Node) => void;
     updateNodes: (id: string, updatedNode: Node) => void;
     deleteNode: (id: string) => void;
-    addEdge: ( edges: any) => void;
+    addEdge: (edges: any) => void;
 }
 
 interface IEdge {
@@ -40,6 +41,12 @@ const nodeStore = create<INodeStore>((set) => ({
             type: "customNode",
             data: { label: "Add items" }
         },
+        {
+            id: "4",
+            position: { x: 300, y: 200 },
+            type: "emailNode",
+            data: { label: "Email template selection" },
+        }
     ],
     edges: [{
         id: "e1-2",

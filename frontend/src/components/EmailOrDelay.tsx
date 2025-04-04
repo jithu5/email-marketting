@@ -13,7 +13,7 @@ import { Clock1, Mail } from "lucide-react";
 import EmailDelayContent from "./EmailDelayContent";
 import nodeStore, { emailTemplateStore } from "../store/emailStore";
 
-function EmailOrDelay({ type, closeMainDialog }: { type: string, closeMainDialog: Function, setEdges:Function }) {
+function EmailOrDelay({ type, closeMainDialog }: { type: string, closeMainDialog: Function }) {
     const [subDialogOpen, setSubDialogOpen] = useState(false);
     const [selectedTemplate, setSelectedTemplate] = useState<string>("")
     const { addNodes, nodes, updateNodes ,addEdge} = nodeStore()
@@ -29,7 +29,8 @@ function EmailOrDelay({ type, closeMainDialog }: { type: string, closeMainDialog
         }
 
         const lastNode = nodes[nodes.length - 1]; // Get the last node
-        const newNodeId = (nodes.length + 1).toString(); // Ensure unique ID
+        const newNodeId = (nodes.length).toString(); // Ensure unique ID
+        const lastNodeId = (nodes.length - 1).toString(); // Get the last node ID
 
         const newNode = {
             id: newNodeId,
@@ -44,9 +45,9 @@ function EmailOrDelay({ type, closeMainDialog }: { type: string, closeMainDialog
         addNodes(newNode); // Add new node
 
         // Update the last node to ensure smooth linking
-        if (lastNode) {
-            updateNodes(lastNode.id, { position: { x: lastNode.position.x, y: lastNode.position.y+300 } });
-        }
+        // if (lastNode) {
+            updateNodes(lastNodeId, {id:"w", position: { x: lastNode.position.x, y: lastNode.position.y+300 },data: { label:'m', }});
+        // }
         const newEdge = { id: `e${Number(newNodeId) - 1}-${newNodeId}`, source: Number(newNodeId) - 1, target: newNodeId }
         addEdge(newEdge); // Automatically add edge
 

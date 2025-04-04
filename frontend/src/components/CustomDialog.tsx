@@ -22,8 +22,8 @@ function CustomDialog() {
     return (
         <div className="relative p-4 border border-gray-300 rounded-lg bg-white shadow-lg w-80">
             <Handle
-                type="target"
-                position={Position.Top}
+                    type="target"
+            position={Position.Top}
                 className="bg-gray-500 w-3 h-3 rounded-full"
             />
 
