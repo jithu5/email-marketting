@@ -45,7 +45,7 @@ function Canvas() {
     };
 
     return (
-        <main className="h-screen w-full flex flex-col">
+        <main className="h-[85vh] w-[90vw] mx-auto flex flex-col">
             <ReactFlow
                 nodes={flowNodes} // Uses local state
                 onNodesChange={onNodesChange}

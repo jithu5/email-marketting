@@ -2,6 +2,16 @@ import { Position, Handle } from "@xyflow/react"
 import { Clock } from "lucide-react"
 
 function DelayNode({ data }: { data: { label: Date, value: Date } }) {
+    function formatDelay(seconds: number) {
+        const days = Math.floor(seconds / (3600 * 24));
+        const hours = Math.floor((seconds % (3600 * 24)) / 3600);
+        const minutes = Math.floor((seconds % 3600) / 60);
+
+        return `${days}d ${hours}h ${minutes}m`;
+    }
+
+    const delayInSeconds = Math.round((new Date(data.value).getTime() - new Date().getTime()) / 1000);
+    const formattedDelay = formatDelay(delayInSeconds);
     return (
         <>
             <div className="relative px-4 py-6 border border-gray-300 rounded-lg bg-white shadow-lg w-64">
@@ -18,8 +28,8 @@ function DelayNode({ data }: { data: { label: Date, value: Date } }) {
                         <h1 className="text-2xl font-semibold">Delay</h1>
                         <p className="text-sm">
                             Time Delay: {
-                                Math.round((new Date(data.label).getTime()) - new Date().getTime() / 1000)
-                            } seconds
+                                formattedDelay
+                            }
                         </p>
 
                     </div>

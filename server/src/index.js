@@ -5,9 +5,11 @@ const Agenda = require("agenda");
 const nodemailer = require("nodemailer");
 const cors = require("cors");
 const morgan = require("morgan");
+import dbConnect from "./database/dbConnect";
 
 const app = express();
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(cors({ origin: "http://localhost:5173" }));
 app.use(morgan("dev"));
 
@@ -16,11 +18,11 @@ const MONGO_URI =
 const AGENDA_DB_URI =
   process.env.AGENDA_DB_URI || "mongodb://localhost:27017/agenda-jobs";
 
-// ✅ Connect to MongoDB
-mongoose
-  .connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => console.log("✅ Connected to MongoDB"))
-  .catch((err) => console.error("❌ MongoDB Error:", err));
+// // ✅ Connect to MongoDB
+// mongoose
+//   .connect(MONGO_URI)
+//   .then(() => console.log("✅ Connected to MongoDB"))
+//   .catch((err) => console.error("❌ MongoDB Error:", err));
 
 // ✅ Agenda Setup
 const agenda = new Agenda({ db: { address: AGENDA_DB_URI } });
@@ -64,21 +66,45 @@ agenda.define("send email", async (job) => {
 app.post("/api/save-flow", async (req, res) => {
   try {
     const { nodes } = req.body;
+    console.log(req.body)
     console.log("🔄 Received nodes:", nodes);
 
-    const delayNode = nodes.find((node) => node.data.label === "Wait/Delay");
-    const delay = delayNode ? (delayNode.data.delay || 60) * 1000 : 0; // Default 60s delay
-
     await agenda.start();
-    await agenda.schedule(new Date(Date.now() + delay), "send email", {
-      email: "abijithr202@gmail.com",
-      subject: "Automated Email",
-      body: "Hello, this is a scheduled email!",
-      to: nodes[0].data.value,
-    });
 
-    console.log("✅ Email scheduled successfully!");
-    res.json({ message: "Flow saved and email scheduled" });
+    let totalDelay = 0; // Total time from now for each email
+    let lastWasDelay = false;
+
+    for (let i = 0; i < nodes.length; i++) {
+      const node = nodes[i];
+
+      if (node.type === "delayNode") {
+        const delay = (node.data.value || 60) * 1000;
+        totalDelay += delay;
+        lastWasDelay = true;
+      }
+
+      if (node.type === "emailNode") {
+        await agenda.schedule(new Date(Date.now() + totalDelay), "send email", {
+          email: "abijithr202@gmail.com",
+          subject: "Automated Email",
+          body: "Hello, this is a scheduled email!",
+          to: "jithuabijith8@gmail.com",
+        });
+
+        console.log(
+          `📧 Scheduled email to ${node.data.value} at +${totalDelay / 1000}s`
+        );
+
+        // If the previous node wasn't a delay, add 1 second buffer to simulate immediate next
+        if (!lastWasDelay) {
+          totalDelay += 1000;
+        }
+
+        lastWasDelay = false;
+      }
+    }
+
+    res.json({ message: "Flow saved and emails scheduled" });
   } catch (error) {
     console.error("❌ Error:", error);
     res.status(500).json({ error: "Internal Server Error" });

@@ -53,25 +53,6 @@ function EmailDelayContent({ type, setSelectedTemplate, delayDateTime, handleDat
                                     </SelectContent>
                                 </Select>
                             </div>
-                            {
-                                isEmailNode && <div>
-                                    <Select>
-                                        <SelectTrigger className="w-[180px]">
-                                            <SelectValue placeholder="Select a template" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectGroup>
-                                                <SelectLabel>Templates</SelectLabel>
-                                                {
-                                                    emailTemplates.map((email) => (
-                                                        <SelectItem key={email.name} value={email.name}>{email.name}</SelectItem>
-                                                    ))
-                                                }
-                                            </SelectGroup>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                            }
                         </>
                         :
                         <div className="flex flex-col gap-2 p-4 w-full">
