@@ -1,20 +1,23 @@
-require("dotenv").config();
-const express = require("express");
-const mongoose = require("mongoose");
-const Agenda = require("agenda");
-const nodemailer = require("nodemailer");
-const cors = require("cors");
-const morgan = require("morgan");
-import dbConnect from "./database/dbConnect";
+import "dotenv/config";
+import express from "express";
+import Agenda from "agenda";
+import nodemailer from "nodemailer";
+import cors from "cors";
+import cookieParser from "cookie-parser";
+import morgan from "morgan";
+import dbConnect from "./database/dbConnect.js";
+import userRouter from "./routes/user-route.js";
+
+// connect to mongoDb database
+dbConnect();
 
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cors({ origin: "http://localhost:5173" }));
+app.use(cookieParser());
+app.use(cors({ origin: "http://localhost:5173", credentials: true }));
 app.use(morgan("dev"));
 
-const MONGO_URI =
-  process.env.MONGO_URI || "mongodb://localhost:27017/email-marketing";
 const AGENDA_DB_URI =
   process.env.AGENDA_DB_URI || "mongodb://localhost:27017/agenda-jobs";
 
@@ -23,6 +26,9 @@ const AGENDA_DB_URI =
 //   .connect(MONGO_URI)
 //   .then(() => console.log("✅ Connected to MongoDB"))
 //   .catch((err) => console.error("❌ MongoDB Error:", err));
+
+// routers
+app.use("/api/user", userRouter);
 
 // ✅ Agenda Setup
 const agenda = new Agenda({ db: { address: AGENDA_DB_URI } });
@@ -40,7 +46,7 @@ const transporter = nodemailer.createTransport({
 
 // ✅ Define Agenda Job with Debugging
 agenda.define("send email", async (job) => {
-  const { email, subject, body,to } = job.attrs.data;
+  const { email, subject, body, to } = job.attrs.data;
   console.log(`📧 Trying to send email to ${email}...`);
 
   try {
@@ -66,7 +72,7 @@ agenda.define("send email", async (job) => {
 app.post("/api/save-flow", async (req, res) => {
   try {
     const { nodes } = req.body;
-    console.log(req.body)
+    console.log(req.body);
     console.log("🔄 Received nodes:", nodes);
 
     await agenda.start();
@@ -109,6 +115,16 @@ app.post("/api/save-flow", async (req, res) => {
     console.error("❌ Error:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
+});
+
+// error handling
+app.use((err, req, res, next) => {
+  console.error("❌ Error:", err);
+  res.status(err.statusCode || 500).json({
+    status: err.statusCode || 500,
+    message: err.message || "Internal Server Error",
+    error: err.error || "Some error occurred",
+  });
 });
 
 // ✅ Start Server

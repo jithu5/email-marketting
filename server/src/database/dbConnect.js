@@ -15,10 +15,10 @@ class DatabaseConnection {
       this.isConnected = true;
     });
 
-    mongoose.connection.on("error", () => {
-      console.error("❌ MongoDB connection error:", error.message);
-      this.isConnected = false;
-    });
+   mongoose.connection.on("error", (error) => {
+     console.error("❌ MongoDB connection error:", error.message);
+   });
+
 
     mongoose.connection.on("disconnected", () => {
       console.log("❌ MongoDB disconnected!");
@@ -26,7 +26,7 @@ class DatabaseConnection {
       // attempt reconnection
     });
 
-    process.on("SIGTERM");
+    // process.on("SIGTERM");
   }
 
   async connect() {
@@ -36,8 +36,6 @@ class DatabaseConnection {
       }
 
       const connectionOptions = {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
         maxPoolSize: 10,
         serverSelectionTimeoutMS: 5000,
         connectTimeoutMS: 10000,
@@ -45,7 +43,7 @@ class DatabaseConnection {
         family: 4, // use IPv4
       };
 
-      if (!process.env.NODE_ENV === "production") {
+      if (process.env.NODE_ENV !== "production") {
         mongoose.set("debug", true);
       }
 
@@ -65,7 +63,7 @@ class DatabaseConnection {
       console.log(
         `🔄 Retrying connection (${this.retryCount}/${MAX_RETRIES})...`
       );
-      await new Promise((resolve) => setTimeout(resolve, RETRY_INTERVAL));
+      await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY));
       return this.connect();
     } else {
       console.error("❌ Max retries reached. Exiting...");
@@ -95,7 +93,7 @@ class DatabaseConnection {
     return {
         isConnected: this.isConnected,
         retryCount: this.retryCount,
-        resdyState: mongoose.connection.readyState,
+        readyState: mongoose.connection.readyState,
     }
   }
 }
