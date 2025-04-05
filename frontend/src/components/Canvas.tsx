@@ -7,6 +7,9 @@ import {
     MiniMap,
     Background,
     Controls,
+    getIncomers,
+    getOutgoers,
+    getConnectedEdges,
     type Connection,
 } from "@xyflow/react";
 import {  type Node, type Edge } from "reactflow"
@@ -38,6 +41,42 @@ function Canvas() {
         }, [setEdges, nodes]
     );
 
+    const onNodesDelete = useCallback(
+        (deletedNodes: Node[]) => {
+            setEdges((prevEdges:Edge[]) => {
+                let updatedEdges = [...prevEdges];
+
+                deletedNodes.forEach((node) => {
+                    const incomers = getIncomers(node, flowNodes, prevEdges);
+                    const outgoers = getOutgoers(node, flowNodes, prevEdges);
+                    const connectedEdges = getConnectedEdges([node], prevEdges);
+
+                    // Remove edges that were connected to the deleted node
+                    updatedEdges = updatedEdges.filter(
+                        (edge) => !connectedEdges.includes(edge)
+                    );
+
+                    // Connect the node's incomers to its outgoers
+                    const newEdges: Edge[] = incomers.flatMap(({ id: source }:Node) =>
+                        outgoers.map(({ id: target }:Node) => ({
+                            id: `${source}->${target}`,
+                            source,
+                            target,
+                            animated: true,
+                            type: 'default',
+                        }))
+                    );
+
+                    updatedEdges = [...updatedEdges, ...newEdges];
+                });
+
+                return updatedEdges;
+            });
+        },
+        [flowNodes, setEdges]
+    );
+
+
     const nodeTypes = {
         customNode: CustomDialog,
         emailNode:EmailNode,
@@ -47,14 +86,15 @@ function Canvas() {
     return (
         <main className="h-[85vh] w-[90vw] mx-auto flex flex-col">
             <ReactFlow
-                nodes={flowNodes} // Uses local state
+                nodes={flowNodes}
                 onNodesChange={onNodesChange}
                 edges={edges}
                 onEdgesChange={onEdgesChange}
                 onConnect={onConnect}
+                onNodesDelete={onNodesDelete} // ← plug it in here
                 nodeTypes={nodeTypes}
-
             >
+
                 <MiniMap />
                 <Background />
                 <Controls />

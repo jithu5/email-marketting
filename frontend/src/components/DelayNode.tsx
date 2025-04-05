@@ -1,17 +1,40 @@
-import { Position, Handle } from "@xyflow/react"
-import { Clock } from "lucide-react"
+import nodeStore from "../store/emailStore";
+import { Position, Handle, useReactFlow, getIncomers, getOutgoers, getConnectedEdges } from "@xyflow/react"
+import { Clock, Trash2 } from "lucide-react"
+import { type Edge, type Node } from "reactflow";
 
-function DelayNode({ data }: { data: { label: Date, value: Date } }) {
-    function formatDelay(seconds: number) {
-        const days = Math.floor(seconds / (3600 * 24));
-        const hours = Math.floor((seconds % (3600 * 24)) / 3600);
-        const minutes = Math.floor((seconds % 3600) / 60);
+function DelayNode({ id,data }: {id:string, data: { label: Date, value: string } }) {
+    const { deleteNode } = nodeStore();
+    const { getNodes, getEdges, setEdges } = useReactFlow();
 
-        return `${days}d ${hours}h ${minutes}m`;
-    }
+    const handleDelete = () => {
+        const flowNodes = getNodes();
+        const flowEdges = getEdges();
 
-    const delayInSeconds = Math.round((new Date(data.value).getTime() - new Date().getTime()) / 1000);
-    const formattedDelay = formatDelay(delayInSeconds);
+        const nodeToDelete = flowNodes.find((n:Node) => n.id === id);
+        if (!nodeToDelete) return;
+
+        const incomers = getIncomers(nodeToDelete, flowNodes, flowEdges);
+        const outgoers = getOutgoers(nodeToDelete, flowNodes, flowEdges);
+        const connectedEdges = getConnectedEdges([nodeToDelete], flowEdges);
+
+        let updatedEdges = flowEdges.filter(
+            (edge:Edge) => !connectedEdges.includes(edge)
+        );
+
+        const newEdges = incomers.flatMap(({ id: source }:Node) =>
+            outgoers.map(({ id: target }:Node) => ({
+                id: `${source}->${target}`,
+                source,
+                target,
+                animated: true,
+                type: "default",
+            }))
+        );
+
+        setEdges([...updatedEdges, ...newEdges]);
+        deleteNode(id); // Zustand update
+    };
     return (
         <>
             <div className="relative px-4 py-6 border border-gray-300 rounded-lg bg-white shadow-lg w-64">
@@ -21,14 +44,20 @@ function DelayNode({ data }: { data: { label: Date, value: Date } }) {
                     className="bg-gray-500 w-3 h-3 rounded-full" />
                 <div className="flex items-start justify-center gap-4">
                     <div className="h-14 w-32 rounded-sm bg-violet-400 flex justify-center items-center">
-
+                        <button
+                            onClick={handleDelete}
+                            className="text-red-500 hover:text-red-700 cursor-pointer absolute top-2 right-2"
+                            title="Delete Node"
+                        >
+                            <Trash2 size={18} />
+                        </button>
                         <Clock className="text-violet-600 text-xl" />
                     </div>
                     <div className="flex flex-col gap-3 items-center justify-start">
                         <h1 className="text-2xl font-semibold">Delay</h1>
                         <p className="text-sm">
                             Time Delay: {
-                                formattedDelay
+                                data.value
                             }
                         </p>
 

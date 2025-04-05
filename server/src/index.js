@@ -77,16 +77,43 @@ app.post("/api/save-flow", async (req, res) => {
 
     await agenda.start();
 
-    let totalDelay = 0; // Total time from now for each email
+    let totalDelay = 0;
     let lastWasDelay = false;
+
+    // Helper to parse "4 minutes", "2 hours", etc. into milliseconds
+    function parseDelay(valueString) {
+      if (!valueString) return 0;
+
+      const [amountStr, unit] = valueString.toLowerCase().split(" ");
+      const amount = parseFloat(amountStr); // in case you want "1.5 minutes"
+
+      const unitToMs = {
+        second: 1000,
+        seconds: 1000,
+        minute: 60 * 1000,
+        minutes: 60 * 1000,
+        hour: 60 * 60 * 1000,
+        hours: 60 * 60 * 1000,
+        day: 24 * 60 * 60 * 1000,
+        days: 24 * 60 * 60 * 1000,
+      };
+
+      return amount * (unitToMs[unit] || 1000);
+    }
 
     for (let i = 0; i < nodes.length; i++) {
       const node = nodes[i];
 
       if (node.type === "delayNode") {
-        const delay = (node.data.value || 60) * 1000;
+        const delay = parseDelay(node.data.value);
         totalDelay += delay;
         lastWasDelay = true;
+
+        console.log(
+          `⏱️ Added delay of ${delay / 1000}s, total delay now ${
+            totalDelay / 1000
+          }s`
+        );
       }
 
       if (node.type === "emailNode") {
@@ -94,16 +121,15 @@ app.post("/api/save-flow", async (req, res) => {
           email: "abijithr202@gmail.com",
           subject: "Automated Email",
           body: "Hello, this is a scheduled email!",
-          to: "jithuabijith8@gmail.com",
+          to: "jithuabijith8@gmail.com", // Can be node.data.email if dynamic
         });
 
         console.log(
           `📧 Scheduled email to ${node.data.value} at +${totalDelay / 1000}s`
         );
 
-        // If the previous node wasn't a delay, add 1 second buffer to simulate immediate next
         if (!lastWasDelay) {
-          totalDelay += 1000;
+          totalDelay += 1000; // buffer between emails
         }
 
         lastWasDelay = false;
@@ -116,6 +142,7 @@ app.post("/api/save-flow", async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
+
 
 // error handling
 app.use((err, req, res, next) => {

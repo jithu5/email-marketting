@@ -5,26 +5,15 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrig
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 
-function EmailDelayContent({ type, setSelectedTemplate, delayDateTime, handleDateChange }: { type: string, setSelectedTemplate: Function, delayDateTime: string, handleDateChange: React.ChangeEventHandler<HTMLInputElement>}) {
-    const [isEmailNode, setIsEmailNode] = useState(false);
-    const [minDateTime, setMinDateTime] = useState("");
+function EmailDelayContent({ type, setSelectedTemplate, setDelayTime }: { type: string, setSelectedTemplate: Function, setDelayTime: Function }) {
+
     const emailTemplates = emailTemplateStore((state) => state.emailTemplates)
+    const [time, setTime] = useState<number>(0)
+    const [delayType, setDelayType] = useState<string>("")
 
     useEffect(() => {
-        const now = new Date();
-        const formatted = now.toISOString().slice(0, 16); // "YYYY-MM-DDTHH:mm"
-        setMinDateTime(formatted);
-    }, []);
-
-    const nodes = emailStore((state) => state.nodes);
-
-    useEffect(() => {
-        const emailExists = nodes.find(
-            (singleNode) => singleNode.data?.label === "email"
-        );
-        // check if emailExists
-        emailExists ? setIsEmailNode(true) : setIsEmailNode(false);
-    }, [nodes]);
+        setDelayTime(`${time} ${delayType}`)
+    }, [time,delayType])
 
     return (
         <>
@@ -59,16 +48,28 @@ function EmailDelayContent({ type, setSelectedTemplate, delayDateTime, handleDat
                             <Label className="font-medium text-center">Delay Time</Label>
                             <div className="flex flex-col gap-4">
                                 <div className="flex flex-col w-full">
-                                    <Label htmlFor="delay">Select Date & Time</Label>
                                     <Input
-                                        id="delay"
-                                        type="datetime-local"
-                                        className="w-full"
-                                        min={minDateTime}
-                                        value={delayDateTime}
-                                        onChange={handleDateChange}
+                                        type="number"
+                                        value={time}
+                                        onChange={(e) => setTime(parseInt(e.target.value))}
                                     />
                                 </div>
+                                <Select onValueChange={(value) => setDelayType(value)}>
+                                    <SelectTrigger className="w-[180px]">
+                                        <SelectValue placeholder="Select a delay" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectGroup>
+                                            <SelectLabel>select Delay type</SelectLabel>
+
+                                            <SelectItem value="seconds">seconds</SelectItem>
+                                            <SelectItem value="minutes">minutes</SelectItem>
+                                            <SelectItem value="hours">hours</SelectItem>
+                                            <SelectItem value="days">days</SelectItem>
+
+                                        </SelectGroup>
+                                    </SelectContent>
+                                </Select>
                             </div>
                         </div>
                 }

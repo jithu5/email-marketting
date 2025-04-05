@@ -18,8 +18,8 @@ import { type Edge, type Node } from "reactflow";
 function EmailOrDelay({ type, closeMainDialog }: { type: string, closeMainDialog: Function }) {
     const [subDialogOpen, setSubDialogOpen] = useState(false);
     const [selectedTemplate, setSelectedTemplate] = useState<string>("")
-    const [delayDateTime, setDelayDateTime] = useState<string>("")
-    const { addNodes, nodes, updateNodes, addEdge } = nodeStore()
+    const [delayTime, setDelayTime] = useState<string>("")
+    const { addNodes, nodes, updateNodes, addEdge,edges} = nodeStore()
     const { emailTemplates } = emailTemplateStore()
     const { setNodes, setEdges } = useReactFlow();
 
@@ -72,12 +72,7 @@ function EmailOrDelay({ type, closeMainDialog }: { type: string, closeMainDialog
         console.log('changing')
     }, [nodes, addNodes, updateNodes, addEdge, setEdges]);
 
-    const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setDelayDateTime(e.target.value);
-        console.log("Selected Delay DateTime:", e.target.value); // optional
-    };
-
-    const addDelayNode = useCallback((time: Date) => {
+    const addDelayNode = useCallback((time: string) => {
         const lastNode = nodes[nodes.length - 1];
         const newNodeId = (nodes.length).toString();
         const lastNodeId = (nodes.length).toString();
@@ -115,7 +110,11 @@ function EmailOrDelay({ type, closeMainDialog }: { type: string, closeMainDialog
         console.log('changing')
     }, [nodes, addNodes, updateNodes, addEdge, setEdges])
 
+  
+
     console.log(nodes)
+    console.log(edges)
+
     return (
         <Dialog open={subDialogOpen} onOpenChange={setSubDialogOpen}>
             <DialogTrigger asChild>
@@ -149,8 +148,8 @@ function EmailOrDelay({ type, closeMainDialog }: { type: string, closeMainDialog
                     </DialogDescription>
                 </DialogHeader>
 
-                {type.toLocaleLowerCase() === "email" ? <EmailDelayContent type="email" setSelectedTemplate={setSelectedTemplate} delayDateTime={delayDateTime}handleDateChange={handleDateChange}/> :
-                    <EmailDelayContent type="delay" setSelectedTemplate={setSelectedTemplate} delayDateTime={delayDateTime} handleDateChange={handleDateChange}/>}
+                {type.toLocaleLowerCase() === "email" ? <EmailDelayContent type="email" setSelectedTemplate={setSelectedTemplate} setDelayTime={setDelayTime}/> :
+                    <EmailDelayContent type="delay" setSelectedTemplate={setSelectedTemplate} setDelayTime={setDelayTime} />}
 
                 <DialogFooter>
                     {type.toLocaleLowerCase() === "email" ? <Button onClick={() => {
@@ -159,7 +158,7 @@ function EmailOrDelay({ type, closeMainDialog }: { type: string, closeMainDialog
                     }}>Proceed with this template</Button> :
                         <Button onClick={() => {
                             setSubDialogOpen(false)
-                            addDelayNode(new Date)
+                            addDelayNode(delayTime)
                         }}>proceed this delay</Button>
                     }
                 </DialogFooter>

@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { addEdge } from "@xyflow/react";
-import { type Node } from "reactflow";
+import { type Node,type Edge } from "reactflow";
 import { emailTemplates } from "../constants/index";
 
 
@@ -8,23 +8,15 @@ type UpdateNode = Partial<Node>;
 // Define Zustand store
 interface INodeStore {
     nodes: Node[];
-    edges: IEdge[];
+    edges: Edge[];
     addNodes: (newNode: Node) => void;
     updateNodes: (id: string, updatedNode: UpdateNode) => void;
     deleteNode: (id: string) => void;
     addEdge: (edges: any) => void;
 }
 
-interface IEdge {
-    id: string;
-    source: string;
-    target: string;
-    type: string;
-    animated?: boolean;
-}
-
 // Zustand store creation
-const nodeStore = create<INodeStore>((set) => ({
+const nodeStore = create<INodeStore>((set,get) => ({
     nodes: [
         {
             id: "1",
@@ -65,10 +57,15 @@ const nodeStore = create<INodeStore>((set) => ({
         })),
 
 
-    deleteNode: (id) =>
+    deleteNode: (nodeId: string) => {
         set((state) => ({
-            nodes: state.nodes.filter((node) => node.id !== id),
-        })),
+            nodes: state.nodes.filter((node) => node.id !== nodeId),
+            edges: state.edges.filter(
+                (edge) => edge.source !== nodeId && edge.target !== nodeId
+            ),
+        }));
+    },
+
     addEdge: (newEdge) =>
         set((state) => ({
             edges: addEdge(newEdge, state.edges),

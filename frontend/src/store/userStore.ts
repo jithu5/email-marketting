@@ -1,9 +1,8 @@
 import { create } from "zustand";
-import { Types } from "mongoose";
 
 // Define user interface
 interface User {
-    _id: Types.ObjectId;
+    _id: string;
     name: string;
     email: string;
     password?: string;
