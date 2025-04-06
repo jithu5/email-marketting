@@ -10,30 +10,29 @@ import userStore from "./store/userStore"
 
 function App() {
 
-  const { nodes } = nodeStore()
-  const { setUser ,user} = userStore()
-console.log(user)
+  const { nodes} = nodeStore()
+  const { setUser, user } = userStore()
+  console.log(user)
   useEffect(() => {
     console.log("Mounted"); // Add this to confirm useEffect is running
 
     async function fetchUser() {
-      try{
-      console.log("Inside fetchUser"); // You should see this
-      const { data } = await axios.get("http://localhost:5000/api/user/profile", {
-        withCredentials: true,
-      });
+      try {
+        console.log("Inside fetchUser"); // You should see this
+        const { data } = await axios.get("http://localhost:5000/api/user/profile", {
+          withCredentials: true,
+        });
 
-      setUser(data.data);
-      console.log(data.message);
-    }catch(error){
-      console.error("Error fetching user");
-      console.error(error);
-    }
+        setUser(data.data);
+        console.log(data.message);
+      } catch (error) {
+        console.error("Error fetching user");
+        console.error(error);
+      }
     }
 
     fetchUser();
   }, []);
-
 
 
   const onSubmit = async (nodes: Node[]) => {

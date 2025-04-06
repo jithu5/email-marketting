@@ -2,6 +2,7 @@ import { AsyncHandler } from "../utils/AsyncHandler.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { ApiError } from "../utils/ApiError.js";
 import User from "../models/user.model.js";
+import Node from "../models/node.model.js";
 
 export const signUp = AsyncHandler(async (req, res) => {
   const { name, email, password } = req.body;
@@ -20,13 +21,41 @@ export const signUp = AsyncHandler(async (req, res) => {
 
     const token = await user.generateAuthToken();
 
+    res.cookie("token", token, {
+      expires: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000),
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+    });
+
+    const addInitialNodes = await Node.insertMany([
+      {
+        id: "1",
+        position: { x: 138, y: 0 },
+        type: "customNode",
+        data: { label: "Add items" },
+        userId: user._id,
+      },
+      {
+        id: "2",
+        data: { label: "sequence start point" },
+        position: { x: 100, y: 200 },
+        userId: user._id,
+      },
+      {
+        id: "3",
+        position: { x: 138, y: 350 },
+        type: "customNode",
+        data: { label: "Add items" },
+        userId: user._id,
+      },
+    ]);
+    if (!addInitialNodes || addInitialNodes.length === 0) {
+      await User.deleteOne({ _id: user._id }); // don't need to pass filter as an object if you already have user instance
+      throw new ApiError(400, "Error in adding initial nodes");
+    }
+
     res
-      .cookie("token", token, {
-        expires: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000),
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-      })
       .status(201)
       .json(new ApiResponse(201, user, "User created successfully"));
   } catch (error) {

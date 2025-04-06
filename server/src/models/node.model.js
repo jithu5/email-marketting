@@ -24,12 +24,10 @@ const NodeSchema = new mongoose.Schema(
       },
       value: {
         type: Object,
-        required: true,
       },
     },
     type: {
       type: String,
-      required: true,
     },
     userId:{
       type: mongoose.Schema.Types.ObjectId,

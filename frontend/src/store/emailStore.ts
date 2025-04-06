@@ -1,42 +1,32 @@
 import { create } from "zustand";
 import { addEdge } from "@xyflow/react";
-import { type Node,type Edge } from "reactflow";
+import { type Node, type Edge } from "reactflow";
 import { emailTemplates } from "../constants/index";
 
+export interface INode extends Node {
+    _id?: string,
+    userId?: string,
+    __v?: number,
+    createdAt?: Date,
+    updatedAt?: Date
+}
 
-type UpdateNode = Partial<Node>;
+type UpdateNode = Partial<INode>;
 // Define Zustand store
 interface INodeStore {
-    nodes: Node[];
+    nodes: INode[];
     edges: Edge[];
-    addNodes: (newNode: Node) => void;
+    setNodes(nodes: INode[]): void;
+    addNodes: (newNode: INode) => void;
     updateNodes: (id: string, updatedNode: UpdateNode) => void;
     deleteNode: (id: string) => void;
+    setEdges(edges: Edge[]): void;
     addEdge: (edges: any) => void;
 }
 
 // Zustand store creation
-const nodeStore = create<INodeStore>((set,get) => ({
-    nodes: [
-        {
-            id: "1",
-            position: { x: 138, y: 0 },
-            type: "customNode",
-            data: { label: "Add items" }
-        },
-        {
-            id: "2",
-            data: { label: "sequence start point" },
-            position: { x: 100, y: 200 },
-        },
-        {
-            id: "3",
-            position: { x: 138, y: 350 },
-            type: "customNode",
-            data: { label: "Add items" }
-        },
-        
-    ],
+const nodeStore = create<INodeStore>((set) => ({
+    nodes: [],
     edges: [{
         id: "e1-2",
         source: "2",
@@ -44,7 +34,11 @@ const nodeStore = create<INodeStore>((set,get) => ({
         type: "default",
         animated: true,
     },],
-
+    // Set all nodes (overwrites)
+    setNodes: (nodes) => {
+        console.log('Setting nodes:', nodes); // ✅ Log safely here
+        set({ nodes });
+    },
     addNodes: (newNode) =>
         set((state) => ({
             nodes: [...state.nodes, newNode],
@@ -65,6 +59,9 @@ const nodeStore = create<INodeStore>((set,get) => ({
             ),
         }));
     },
+    setEdges: (edges) => set(() => ({
+        edges
+    })),
 
     addEdge: (newEdge) =>
         set((state) => ({
