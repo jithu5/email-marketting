@@ -7,6 +7,8 @@ import cookieParser from "cookie-parser";
 import morgan from "morgan";
 import dbConnect from "./database/dbConnect.js";
 import userRouter from "./routes/user-route.js";
+import nodeRouter from "./routes/node-route.js";
+import edgeRouter from "./routes/edge-route.js";
 
 // connect to mongoDb database
 dbConnect();
@@ -29,6 +31,8 @@ const AGENDA_DB_URI =
 
 // routers
 app.use("/api/user", userRouter);
+app.use("/api/node", nodeRouter);
+app.use("/api/edge", edgeRouter);
 
 // ✅ Agenda Setup
 const agenda = new Agenda({ db: { address: AGENDA_DB_URI } });

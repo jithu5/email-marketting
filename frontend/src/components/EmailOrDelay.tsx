@@ -18,11 +18,10 @@ import { type Edge, type Node } from "reactflow";
 function EmailOrDelay({ type, closeMainDialog }: { type: string, closeMainDialog: Function }) {
     const [subDialogOpen, setSubDialogOpen] = useState(false);
     const [selectedTemplate, setSelectedTemplate] = useState<string>("")
-    const [delayTime, setDelayTime] = useState<string>("")
+    const [delayTime, setDelayTime] = useState<string>("0 seconds")
     const { addNodes, nodes, updateNodes, addEdge,edges} = nodeStore()
     const { emailTemplates } = emailTemplateStore()
     const { setNodes, setEdges } = useReactFlow();
-
 
     const addNewEmailNode = useCallback((emailTemplate: string) => {
         if (!emailTemplate) return;
@@ -73,6 +72,7 @@ function EmailOrDelay({ type, closeMainDialog }: { type: string, closeMainDialog
     }, [nodes, addNodes, updateNodes, addEdge, setEdges]);
 
     const addDelayNode = useCallback((time: string) => {
+        if (!time) return;
         const lastNode = nodes[nodes.length - 1];
         const newNodeId = (nodes.length).toString();
         const lastNodeId = (nodes.length).toString();
@@ -83,7 +83,7 @@ function EmailOrDelay({ type, closeMainDialog }: { type: string, closeMainDialog
                 x: lastNode.position.x,
                 y: lastNode.position.y + 150
             },
-            data: { label: 'Delay', value: time },
+            data: { label: 'Delay', value: time  },
             type: "delayNode",
         };
         updateNodes(lastNodeId, {

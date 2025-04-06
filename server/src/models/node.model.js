@@ -23,7 +23,7 @@ const NodeSchema = new mongoose.Schema(
         required: true,
       },
       value: {
-        type: String,
+        type: Object,
         required: true,
       },
     },
@@ -31,6 +31,11 @@ const NodeSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    userId:{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    }
   },
   {
     timestamps: true,

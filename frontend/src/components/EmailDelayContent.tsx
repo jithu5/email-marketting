@@ -1,9 +1,9 @@
-import emailStore, { emailTemplateStore, IemailTemplates } from "../store/emailStore";
+import { emailTemplateStore } from "../store/emailStore";
 import { useEffect, useState } from "react";
 import { Label } from "./ui/label";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "./ui/select";
-import { Button } from "./ui/button";
 import { Input } from "./ui/input";
+import NewTemplate from "./NewTemplate";
 
 function EmailDelayContent({ type, setSelectedTemplate, setDelayTime }: { type: string, setSelectedTemplate: Function, setDelayTime: Function }) {
 
@@ -13,7 +13,7 @@ function EmailDelayContent({ type, setSelectedTemplate, setDelayTime }: { type: 
 
     useEffect(() => {
         setDelayTime(`${time} ${delayType}`)
-    }, [time,delayType])
+    }, [time, delayType])
 
     return (
         <>
@@ -23,7 +23,7 @@ function EmailDelayContent({ type, setSelectedTemplate, setDelayTime }: { type: 
                         <>
                             <div className="w-full flex justify-between items-center">
                                 {/* Button aligned to the right */}
-                                <Button variant={"secondary"} className="ml-auto">Create Template</Button>
+                                <NewTemplate />
                             </div>
                             <div className="w-full flex justify-center mt-4">
                                 <Select onValueChange={(value) => setSelectedTemplate(value)}>
@@ -60,7 +60,6 @@ function EmailDelayContent({ type, setSelectedTemplate, setDelayTime }: { type: 
                                     </SelectTrigger>
                                     <SelectContent>
                                         <SelectGroup>
-                                            <SelectLabel>select Delay type</SelectLabel>
 
                                             <SelectItem value="seconds">seconds</SelectItem>
                                             <SelectItem value="minutes">minutes</SelectItem>
